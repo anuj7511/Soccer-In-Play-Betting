@@ -18,6 +18,59 @@ This notebook is responsible for predicting if the match ends in a draw. It foll
 
 This notebook is responsible for making the final prediction. It loads the previously trained models and uses them to predict the outcome of the matches. The prediction is based on the probabilities given by each model for each class. The class with the highest probability is chosen as the final prediction. The weights of the probabilities are adjusted based on the precision of each model's performance. The final prediction score on the testing dataset is approximately 68.8% .
 
+### predict_outcome_weighted(X) explained
+
+This function takes as input a Pandas dataframe X that holds match data. The dataframe should contain a column named `HTGD` which represents the Home Team Goal Difference.
+
+It uses three pre-trained logistic regression models (`lr_home_model.pkl`, `lr_away_model.pkl`, and `lr_draw_model.pkl`) to predict the outcome of a football match: `Home Win` (represented as 2), `Away Win` (represented as 0), or `Draw` (represented as 1). Each prediction is weighted by a pre-defined precision weight.
+
+If the `HTGD` (Home Team Goal Difference) is greater than 1, it predicts a `Home Win`. If `HTGD` is less than 1, it predicts an `Away Win`. If `HTGD` equals 1, it uses the trained models to predict the match outcome, factoring in the precision weights.
+
+Below is the flowchart to explain the process:
+```
+                  ┌───────────────┐
+                  │  Start        │
+                  └──────┬────────┘
+                         ▼
+          ┌─────────────────────────────┐
+          │Load logistic regression     │
+          │models from .pkl files       │
+          └───────┬─────────────────────┘
+                  ▼
+┌─────────┐      ┌─────────────────────┐      ┌─────────┐
+│HTGD > 1 │───►  │Predict Home Win     │ ◄──  │HTGD < 1 │
+└─────────┘      └───────┬─────────────┘      └─────────┘
+                         │      ┌────────────┐
+                         │      │  Else      │
+                         │      └─────┬──────┘
+                         ▼            ▼
+┌──────────────────────────────────────────────────────┐
+│Calculate outcome probabilities with each model       │
+│and corresponding precision weights                   │
+└─────────────────────────────┬────────────────────────┘
+                              ▼
+          ┌──────────────────────────────────────────────┐
+          │Determine the outcome with the highest        │
+          │weighted probability                          │
+          └───────┬──────────────────────────────────────┘
+                  ▼
+         ┌────────────────────┐
+         │  Return predictions│
+         └────────────────────┘
+```
+### Predictions
+
+The function returns a list of predictions for the matches in the input dataframe, represented as follows:
+
+`2 : Home Win`
+`0 : Away Win`
+`1 : Draw`
+Feel free to experiment with different match data and precision weights. Enjoy your match predictions!
+
+Note:
+
+Please make sure to have the joblib library installed in your environment and your logistic regression models (.pkl files) should be in the same directory as your Python script for the function to work properly.
+
 ## Conclusion
 
 This project demonstrates the process of predicting the outcome of football matches using machine learning. It includes data preprocessing, exploratory data analysis, model training, and prediction. The models used for prediction are trained using Logistic Regression and their performance is evaluated based on their precision. The final prediction is made by comparing the probabilities given by each model for each class and choosing the class with the highest probability.
